@@ -149,6 +149,10 @@ class Writer(object):
 
         def _write_file(template, localcontext, output_path, name, override):
             """Render the template write the file."""
+            if template.name == 'index.html':
+               if not localcontext.get('articles_home_page').object_list:
+                   return
+
             # set localsiteurl for context so that Contents can adjust links
             if localcontext['localsiteurl']:
                 context['localsiteurl'] = localcontext['localsiteurl']
@@ -178,8 +182,18 @@ class Writer(object):
             localcontext.update(kwargs)
             return localcontext
 
+
         # pagination
         if paginated:
+            articles_home = []
+            black_list = self.settings.get('NOT_ON_HOME_CATEGORIES', [])
+            for val in paginated['articles']:
+                if val.category.name not in black_list:
+                    articles_home.append(val)
+            if articles_home:
+                paginated['articles_home'] = articles_home
+            else:
+                paginated['articles_home'] = paginated['articles']
 
             # pagination needed, init paginators
             paginators = {key: Paginator(name, val, self.settings)
@@ -190,6 +204,7 @@ class Writer(object):
                 paginated_kwargs = kwargs.copy()
                 for key in paginators.keys():
                     paginator = paginators[key]
+                    # page_num = len(paginator.object_list)
                     previous_page = paginator.page(page_num) \
                         if page_num > 0 else None
                     page = paginator.page(page_num + 1)
