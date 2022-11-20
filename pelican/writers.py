@@ -42,6 +42,11 @@ class Writer(object):
         return feed
 
     def _add_item_to_the_feed(self, feed, item):
+        black_list = self.settings.get('NOT_ON_HOME_CATEGORIES', [])
+        if item.category.name in black_list or \
+                [x for x in getattr(item, 'tags', []) if x.name in black_list]:
+                print('skip add {} to feed'.format(item.url))
+                return
 
         title = Markup(item.title).striptags()
         link = '%s/%s' % (self.site_url, item.url)
@@ -196,7 +201,9 @@ class Writer(object):
             articles_home = []
             black_list = self.settings.get('NOT_ON_HOME_CATEGORIES', [])
             for val in paginated['articles']:
-                if val.category.name not in black_list:
+                if val.category.name not in black_list and \
+                        not [x for x in getattr(val, 'tags', [])
+                             if x.name in black_list]:
                     articles_home.append(val)
             if articles_home:
                 paginated['articles_home'] = articles_home

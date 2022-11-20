@@ -5,6 +5,7 @@ import codecs
 import datetime
 import errno
 import fnmatch
+import json
 import locale
 import logging
 import os
@@ -788,3 +789,7 @@ def maybe_pluralize(count, singular, plural):
     if count == 1:
         selection = singular
     return '{} {}'.format(count, selection)
+
+
+def to_unicode_json(o):
+    return json.dumps(o, ensure_ascii=False)

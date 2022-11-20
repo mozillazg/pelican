@@ -21,7 +21,7 @@ from pelican import signals
 from pelican.cache import FileStampDataCacher
 from pelican.contents import Article, Draft, Page, Static, is_valid_content
 from pelican.readers import Readers
-from pelican.utils import (DateFormatter, copy, mkdir_p, posixize_path,
+from pelican.utils import (DateFormatter, copy, mkdir_p, posixize_path, to_unicode_json,
                            process_translations, python_2_unicode_compatible)
 
 
@@ -75,6 +75,7 @@ class Generator(object):
 
         # provide utils.strftime as a jinja filter
         self.env.filters.update({'strftime': DateFormatter()})
+        self.env.filters.update({'to_unicode_json': to_unicode_json})
 
         # get custom Jinja filters from user settings
         custom_filters = self.settings['JINJA_FILTERS']
