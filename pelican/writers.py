@@ -42,11 +42,16 @@ class Writer(object):
         return feed
 
     def _add_item_to_the_feed(self, feed, item):
+        allow_keywords = ['feeds/all-en.atom.xml']
+        bypass_black_list = len([
+            x in feed.feed['feed_url'] for x in allow_keywords]) > 0
+
         black_list = self.settings.get('NOT_ON_HOME_CATEGORIES', [])
-        if item.category.name in black_list or \
-                [x for x in getattr(item, 'tags', []) if x.name in black_list]:
-                print('skip add {} to feed'.format(item.url))
-                return
+        if not bypass_black_list:
+            if item.category.name in black_list or \
+                    [x for x in getattr(item, 'tags', []) if x.name in black_list]:
+                    print('skip add {} to feed'.format(item.url))
+                    return
 
         title = Markup(item.title).striptags()
         link = '%s/%s' % (self.site_url, item.url)
