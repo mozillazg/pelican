@@ -44,13 +44,14 @@ class Writer(object):
     def _add_item_to_the_feed(self, feed, item):
         allow_keywords = ['feeds/all-en.atom.xml']
         bypass_black_list = len([
-            x in feed.feed['feed_url'] for x in allow_keywords]) > 0
+            x for x in allow_keywords if x in feed.feed['feed_url']]) > 0
 
         black_list = self.settings.get('NOT_ON_HOME_CATEGORIES', [])
         if not bypass_black_list:
             if item.category.name in black_list or \
                     [x for x in getattr(item, 'tags', []) if x.name in black_list]:
-                    print('skip add {} to feed'.format(item.url))
+                    print('skip add {} to feed {}'.format(
+                        item.url, feed.feed['feed_url']))
                     return
 
         title = Markup(item.title).striptags()
@@ -205,11 +206,17 @@ class Writer(object):
         if paginated:
             articles_home = []
             black_list = self.settings.get('NOT_ON_HOME_CATEGORIES', [])
+            bypass_list = ['tag/']
+            bypass = len([x for x in bypass_list if x in name]) > 0
             for val in paginated['articles']:
-                if val.category.name not in black_list and \
-                        not [x for x in getattr(val, 'tags', [])
-                             if x.name in black_list]:
-                    articles_home.append(val)
+                if not bypass:
+                    if val.category.name in black_list or \
+                        [x for x in getattr(val, 'tags', [])
+                            if x.name in black_list]:
+                        print('skip add {} to {}'.format(val.url, name))
+                        continue
+
+                articles_home.append(val)
             if articles_home:
                 paginated['articles_home'] = articles_home
             else:
