@@ -562,7 +562,7 @@ class ArticlesGenerator(CachingGenerator):
 
         signals.article_generator_pretaxonomy.send(self)
 
-        for article in self.articles:
+        for article in chain(self.translations, self.articles):
             # only main articles are listed in categories and tags
             # not translations
             self.categories[article.category].append(article)
